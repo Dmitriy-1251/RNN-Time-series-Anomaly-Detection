@@ -1,6 +1,6 @@
-result/*
+
 dataset/*
-save/*
+
 
 *.pyc
 ./idea
