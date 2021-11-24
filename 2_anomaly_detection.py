@@ -152,7 +152,7 @@ try:
             plt.close()
 
 
-            fig, ax1 = plt.subplots(figsize=(15,5))
+            fig, ax1 = plt.subplots(figsize=(30,10))
             ax1.plot(target,label='Target',
                      color='black',  marker='.', linestyle='--', markersize=1, linewidth=0.5)
             ax1.plot(mean_prediction, label='Mean predictions',

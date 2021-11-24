@@ -10,9 +10,9 @@ from pathlib import Path
 from anomalyDetector import fit_norm_distribution_param
 
 parser = argparse.ArgumentParser(description='PyTorch RNN Prediction Model on Time-series Dataset')
-parser.add_argument('--data', type=str, default='ecg',
+parser.add_argument('--data', type=str, default='space_shuttle',
                     help='type of the dataset (ecg, gesture, power_demand, space_shuttle, respiration, nyc_taxi')
-parser.add_argument('--filename', type=str, default='chfdb_chf13_45590.pkl',
+parser.add_argument('--filename', type=str, default='TEK14.pkl',
                     help='filename of the dataset')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU, SRU)')
@@ -32,7 +32,7 @@ parser.add_argument('--weight_decay', type=float, default=1e-4,
                     help='weight decay')
 parser.add_argument('--clip', type=float, default=10,
                     help='gradient clipping')
-parser.add_argument('--epochs', type=int, default=400,
+parser.add_argument('--epochs', type=int, default=100,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='batch size')
@@ -190,7 +190,7 @@ def evaluate_1step_pred(args, model, test_dataset):
             inputSeq, targetSeq = get_batch(args,test_dataset, i)
             outSeq, hidden = model.forward(inputSeq, hidden)
 
-            loss = criterion(outSeq.view(args.batch_size,-1), targetSeq.view(args.batch_size,-1))
+            loss = criterion(outSeq.reshape(args.batch_size,-1), targetSeq.reshape(args.batch_size,-1))
             hidden = model.repackage_hidden(hidden)
             total_loss+= loss.item()
 
@@ -225,14 +225,14 @@ def train(args, model, train_dataset,epoch):
                 hids1.append(hid)
             outSeq1 = torch.cat(outVals,dim=0)
             hids1 = torch.cat(hids1,dim=0)
-            loss1 = criterion(outSeq1.view(args.batch_size,-1), targetSeq.view(args.batch_size,-1))
+            loss1 = criterion(outSeq1.reshape(args.batch_size,-1), targetSeq.reshape(args.batch_size,-1))
 
             '''Loss2: Teacher forcing loss'''
             outSeq2, hidden, hids2 = model.forward(inputSeq, hidden, return_hiddens=True)
-            loss2 = criterion(outSeq2.view(args.batch_size, -1), targetSeq.view(args.batch_size, -1))
+            loss2 = criterion(outSeq2.reshape(args.batch_size, -1), targetSeq.reshape(args.batch_size, -1))
 
             '''Loss3: Simplified Professor forcing loss'''
-            loss3 = criterion(hids1.view(args.batch_size,-1), hids2.view(args.batch_size,-1).detach())
+            loss3 = criterion(hids1.reshape(args.batch_size,-1), hids2.reshape(args.batch_size,-1).detach())
 
             '''Total loss = Loss1+Loss2+Loss3'''
             loss = loss1+loss2+loss3
@@ -276,14 +276,14 @@ def evaluate(args, model, test_dataset):
                 hids1.append(hid)
             outSeq1 = torch.cat(outVals,dim=0)
             hids1 = torch.cat(hids1,dim=0)
-            loss1 = criterion(outSeq1.view(args.batch_size,-1), targetSeq.view(args.batch_size,-1))
+            loss1 = criterion(outSeq1.reshape(args.batch_size,-1), targetSeq.reshape(args.batch_size,-1))
 
             '''Loss2: Teacher forcing loss'''
             outSeq2, hidden, hids2 = model.forward(inputSeq, hidden, return_hiddens=True)
-            loss2 = criterion(outSeq2.view(args.batch_size, -1), targetSeq.view(args.batch_size, -1))
+            loss2 = criterion(outSeq2.reshape(args.batch_size, -1), targetSeq.reshape(args.batch_size, -1))
 
             '''Loss3: Simplified Professor forcing loss'''
-            loss3 = criterion(hids1.view(args.batch_size,-1), hids2.view(args.batch_size,-1).detach())
+            loss3 = criterion(hids1.reshape(args.batch_size,-1), hids2.reshape(args.batch_size,-1).detach())
 
             '''Total loss = Loss1+Loss2+Loss3'''
             loss = loss1+loss2+loss3
